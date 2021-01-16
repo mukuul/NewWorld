@@ -19,10 +19,12 @@ const App = () => {
     region: '',
     subregion: '',
     population: 0,
+    area: 0,
     timezones: [""],
   }
   const [countryData, setCountryData] = useState(initialCountryState)
   const [isLoading, setLoading] = useState(true);
+
   function handleBackButtonClick() {
     setCountry(null);
     return true;
@@ -44,13 +46,13 @@ const App = () => {
   );
 
   useEffect(() => {
-
     fetchCountries()
       .then((res => {
         setdisplayData(res);
       }))
       .catch(console.error)
       .finally(() => setLoading(false));
+
   }, []);
 
   useEffect(() => {
@@ -73,9 +75,11 @@ const App = () => {
               capital: data.capital,
               region: data.region,
               subregion: data.subregion,
-              population: data.population,
+              currency: data.currencies.map(obj => obj.name).join(', '),
+              population: parseFloat(data.population).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'),
+              area: parseFloat(data.area).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'),
               timezones: data.timezones.join(', '),
-              languages: data.languages.map(obj => obj.name).join(', ')
+              languages: data.languages.map(obj => obj.name).join(', '),
             };
             setCountryData(countryObj)
           }
@@ -83,7 +87,6 @@ const App = () => {
       return () => {
         isMounted = false;
       }
-      //return () => ac.abort(); //not working
     }, [country]);
 
   return (
@@ -114,17 +117,19 @@ const App = () => {
               <View style={{ flexDirection: 'row', flex: 0.5 }}>
                 <Text style={{ fontSize: 30, fontWeight: "bold" }}>{countryData.name}</Text>
               </View>
-              <View style={{ flex: 2, justifyContent: 'center', aspectRatio: 1 }}>
+              <View style={{ flex: 2, justifyContent: 'center', aspectRatio: 1, }}>
                 <SvgUri flex='1' width="100%" height="100%" uri={countryData.flag} viewBox="0 0 400 400">
                 </SvgUri>
               </View>
               <View style={styles.countryBox}>
-                <Text>Capital : {countryData.capital}</Text>
-                <Text>Region : {countryData.region}</Text>
-                <Text>Sub Region : {countryData.subregion}</Text>
-                <Text>Population : {countryData.population}</Text>
-                <Text>Languages : {countryData.languages}</Text>
-                <Text>Time Zones : {countryData.timezones}</Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Capital : </Text>{countryData.capital} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Region : </Text>{countryData.region} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Sub Region : </Text>{countryData.subregion} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Currency : </Text>{countryData.currency} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Population : </Text>{countryData.population} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Area : </Text>{countryData.area} km<Text style={{ fontSize: 8, lineHeight: 22, textAlignVertical: 'top' }}>2</Text> </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Languages : </Text>{countryData.languages} </Text>
+                <Text style={styles.name}><Text style={{ fontWeight: 'bold' }}> Time Zones : </Text>{countryData.timezones} </Text>
               </View>
               <Button
                 title="Go Back"
@@ -133,7 +138,7 @@ const App = () => {
             </View>
           )
       )}
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
@@ -154,9 +159,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   countryBox: {
-    flex: 3,
+    flex: 1,
+    flexDirection: 'column',
     backgroundColor: "powderblue",
-    // justifyContent: 'center'
+    justifyContent: 'space-around',
+    alignItems: 'stretch',
+
   }
 });
 
