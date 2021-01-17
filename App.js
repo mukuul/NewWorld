@@ -6,6 +6,24 @@ import {
 import { SvgUri } from 'react-native-svg';
 const { fetchCountries, fetchCountry } = require('./fetchCountryData')
 
+const Item = ({ name, setCountry }) => (
+  <View style={styles.item}>
+    <Text
+      onPress={() => { setCountry(name) }}
+      style={styles.name}
+    >
+      {name}
+    </Text>
+  </View>
+);
+
+
+const handleBackButtonClick = (setCountry) => {
+  return () => {
+  setCountry(null);
+  return true;
+}}
+
 const App = () => {
   const [displayData, setdisplayData] = useState([{ name: "" }]);
   const [text, setText] = useState('');
@@ -23,47 +41,30 @@ const App = () => {
   const [countryData, setCountryData] = useState(initialCountryState)
   const [isLoading, setLoading] = useState(true);
 
-  function handleBackButtonClick() {
-    setCountry(null);
-    return true;
-  }
-
-  const Item = ({ name }) => (
-    <View style={styles.item}>
-      <Text
-        onPress={() => { setCountry(name) }}
-        style={styles.name}
-      >
-        {name}
-      </Text>
-    </View>
-  );
-
-  const renderItem = ({ item }) => (
-    <Item name={item.name} />
-  );
-
   useEffect(() => {
+    let isMounted = true;
     fetchCountries()
       .then((res => {
-        setdisplayData(res);
-      }))
+        if(isMounted) {
+          setdisplayData(res);
+        }}))
       .catch(console.error)
       .finally(() => setLoading(false));
-
+    return () => {
+      isMounted = false;
+    }
   }, []);
 
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick(setCountry));
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick(setCountry));
     };
   }, []);
 
   useEffect(
     () => {
       let isMounted = true;
-      const ac = new AbortController();
       fetchCountry(country)
         .then(data => {
           if (country && isMounted) {
@@ -86,6 +87,10 @@ const App = () => {
         isMounted = false;
       }
     }, [country]);
+
+    const renderItem = ({ item }) => (
+      <Item name={item.name} setCountry={setCountry} />
+    );
 
   return (
     <SafeAreaView style={styles.container}>
