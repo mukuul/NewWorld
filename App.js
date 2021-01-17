@@ -6,8 +6,6 @@ import {
 import { SvgUri } from 'react-native-svg';
 const { fetchCountries, fetchCountry } = require('./fetchCountryData')
 
-
-
 const App = () => {
   const [displayData, setdisplayData] = useState([{ name: "" }]);
   const [text, setText] = useState('');
